@@ -20,6 +20,10 @@ The `oilPrep` package is inspired by the `recipe` package which does a series of
 Load the package and oil data set.
 
 ```{r setup}
+
+# install oilPrep if you haven't
+# devtools::install_github("mohowu/oilPrep", build_vignettes = TRUE)
+
 library(oilPrep)
 library(gamlss)
 data(oil)
