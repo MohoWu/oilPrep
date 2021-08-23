@@ -1,0 +1,94 @@
+---
+title: "How to use `oilPrep` package"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{How to use `oilPrep` package}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+The `oilPrep` package is inspired by the `recipe` package which does a series of data pre-processing for the oil data set in the `gamlss` package.
+
+
+Load the package and oil data set.
+
+```{r setup}
+library(oilPrep)
+library(gamlss)
+data(oil)
+```
+
+First we create a `rec` object where we specify what data and response variable to use.
+
+```{r}
+
+rec0 <- rec(oil, "OILPRICE")
+
+```
+
+The `rec0` object contains:
+
+ * `data`: a data frame containing data with transformed values.
+ * `meta`: a data frame containing meta data such as what transformations have been done to the data and in what order. It also contains some statistical tests results (p-values for normality and stationarity tests). And finally the correaltion coefficient with the response variable.
+ * `y`: The name of the response variable.
+ 
+```{r}
+
+head(rec0$data)
+
+```
+
+```{r}
+
+rec0$meta
+
+```
+
+No meta information yet as no transformations have been done.
+
+```{r}
+
+rec0$y
+```
+
+Then we can specify the data transformation we want by using the `step_*` functions.
+
+```{r}
+
+rec1 <- rec0 %>% 
+  step_roll("CL2_log", "CL2_log_roll_mean_5", "mean", 5) %>% 
+  step_roll("CL2_log", "CL2_log_roll_sd_5", "sd", 5) %>% 
+  step_shift("CL2_log", "CL2_log_lag_2", "lag", 2) %>% 
+  step_shift("CL2_log", "CL2_log_lead_2", "lead", 2) %>% 
+  step_diff("CL2_log", "CL2_log_diff") %>%
+  step_two(c("CL2_log", "CL3_log"), "CL2_3_log_spread", "spread") %>% 
+  step_two(c("CL2_log", "CL3_log"), "CL2_3_log_ratio", "ratio") %>% 
+  step_two(c("CL2_log", "CL3_log"), "CL2_3_log_prod", "product") 
+  
+
+```
+
+To get the transformed data.
+
+```{r}
+
+head(rec1$data, 10)
+```
+
+
+To get the meta data.
+
+```{r}
+
+rec1$meta
+
+```
+
+
